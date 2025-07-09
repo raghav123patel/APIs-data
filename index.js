@@ -3505,4 +3505,132 @@ Voice
 No file chosenNo file chosen
 ChatGPT can make mistakes. Check important info. See Cookie Preferences.
 
+//formik error solved localstorage
+  Skip to content
+You said:
+import React from "react";
+
+import { Formik, Form, Field} from 'formik';
+import * as Yup from 'yup';
+
+const SignupSchema = Yup.object().shape({
+    name: Yup.string()
+    .min(2, 'too short')
+    .max(20, 'too long')
+    .required('Required'),
+    email: Yup.string().email('Invalid email').required('required'),
+    phoneNumber: Yup.string().max(10, 'ten digit number is required')
+});
+const handleSubmit = (values) => {
+    localStorage.setItem("values", JSON.stringify(values));
+}
+export const ValidationSchemaExample = () => (
+    <div>
+        <h1> Signup </h1>
+        <Formik initialValues={{
+            name: "",
+            email: "",
+            phoneNumber: "",
+        }}
+        validationSchema={SignupSchema}
+        onSubmit = {values => {
+            console.log(values);
+        }}
+        >
+            {({ errors, touched}) => (
+                <Form>
+                    <Field name="name" placeholder="enter the name" />
+                    {errors.name && touched.name ? (
+                        <div>{errors.name}</div>
+                    ): null}
+                    <Field name="email" placeholder="enter the email" />
+                    {errors.email && touched.email ? (
+                        <div>{errors.email}</div>
+                    ): null}
+                    <Field name="phoneNumber" placeholder="enter the phone number" />
+                    {errors.phoneNumber && touched.phoneNumber ? (
+                        <div>{errors.phoneNumber}</div>
+                    ): null}
+                    <button type="submit" onClick={handleSubmit}> Submit </button>
+                </Form>
+            )}
+
+        </Formik>
+    </div>
+);  not able to save in localstorage for data
+ChatGPT said:
+You're facing an issue because the handleSubmit function is not being invoked correctly with the Formik's onSubmit method. The onSubmit in Formik is automatically triggered when the user submits the form, and it has access to the values of the form. By adding onClick={handleSubmit} to the button, you're calling handleSubmit in the wrong place and bypassing Formik's submission logic.
+
+To fix this issue, you can directly use Formik's onSubmit for saving the data to localStorage. Here's the updated code:
+
+Updated Code:
+import React from "react";
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
+
+const SignupSchema = Yup.object().shape({
+    name: Yup.string()
+        .min(2, 'too short')
+        .max(20, 'too long')
+        .required('Required'),
+    email: Yup.string().email('Invalid email').required('Required'),
+    phoneNumber: Yup.string().max(10, 'Ten digit number is required').required('Required'),
+});
+
+export const ValidationSchemaExample = () => (
+    <div>
+        <h1>Signup</h1>
+        <Formik
+            initialValues={{
+                name: "",
+                email: "",
+                phoneNumber: "",
+            }}
+            validationSchema={SignupSchema}
+            onSubmit={(values) => {
+                // Save data to localStorage when the form is submitted
+                localStorage.setItem("values", JSON.stringify(values));
+                console.log("Form values saved to localStorage:", values);
+            }}
+        >
+            {({ errors, touched }) => (
+                <Form>
+                    <Field name="name" placeholder="Enter your name" />
+                    {errors.name && touched.name ? <div>{errors.name}</div> : null}
+
+                    <Field name="email" placeholder="Enter your email" />
+                    {errors.email && touched.email ? <div>{errors.email}</div> : null}
+
+                    <Field name="phoneNumber" placeholder="Enter your phone number" />
+                    {errors.phoneNumber && touched.phoneNumber ? <div>{errors.phoneNumber}</div> : null}
+
+                    <button type="submit">Submit</button>
+                </Form>
+            )}
+        </Formik>
+    </div>
+);
+Explanation of Changes:
+Removed the onClick={handleSubmit} from the submit button: You don't need that anymore, because Formik already handles the submit event when the user clicks the submit button.
+
+Used onSubmit directly in Formik: The onSubmit callback function in Formik gets the form values when the form is submitted, and you can save those values directly to localStorage.
+
+Important Notes:
+You can also log the values to the console as I've added in the onSubmit callback to confirm the values are being saved to localStorage.
+
+If you'd like to retrieve the saved values from localStorage, you can do so by calling JSON.parse(localStorage.getItem("values")).
+
+Now, when the form is submitted, the values will be saved to localStorage correctly.
+
+
+
+
+Attach
+
+Search
+
+Voice
+No file chosenNo file chosen
+ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+
 

@@ -121,6 +121,7 @@ const auditLogSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("AuditLog", auditLogSchema);
+//auth, user, product, order, category,cart,coupon,review, notification,admin,auditlog, wishlist
 //apis 
 1. auth- register, login, logout, forgot, reset
 2. user- getloggedinProfile, updatemyprofile- user, admin- getallusers, getsingleuser, updateuserrole, banuser, deleteuser

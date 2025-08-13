@@ -408,4 +408,6 @@ Voice
 No file chosenNo file chosen
 ChatGPT can make mistakes. Check important info. See Cookie Preferences.
 
-
+1.deployment
+  2. subsriber graphql
+  3.toast

@@ -398,7 +398,7 @@ Codegen → use GraphQL code generators for type-safe operations.
 If you're not using React and want vanilla JS + Apollo Client, let me know and I’ll provide a plain JS version.
 
 
-
+raghav
 
 Attach
 

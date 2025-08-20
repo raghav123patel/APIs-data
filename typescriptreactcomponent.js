@@ -178,4 +178,5 @@ Study
 Voice
 No file chosenNo file chosen
 ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+  1. we can define and pass in props in component
 

@@ -3191,3 +3191,307 @@ Voice
 No file chosenNo file chosen
 ChatGPT can make mistakes. Check important info. See Cookie Preferences.
 
+//coupon code
+Skip to content
+You said:
+const mongoose = require("mongoose");
+
+const couponSchema = new mongoose.Schema({
+    code: {
+        type: String,
+        required: true,
+    },
+    discount: {
+        type: Number,
+
+    },
+    expiry: {  
+        type: Date,
+
+    },    
+    usageLimit: {
+        type: Number,
+    },
+    usedBy: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        }
+    ]
+
+    
+}, {timestamps: true})
+
+ module.exports = mongoose.model("Coupon", couponSchema);  in e-commerce project i am having this coupon code model i want an api of coupon code creation 
+ChatGPT said:
+Here’s a simple Express API endpoint to create a coupon using your existing Mongoose Coupon model.
+
+✅ Assumptions
+You're using Express.js for your backend.
+
+You have connected to MongoDB using Mongoose.
+
+The Coupon model file is named Coupon.js.
+
+You want to create a coupon by sending a POST request with required data.
+
+📁 File Structure (example)
+/models
+  └── Coupon.js
+/routes
+  └── couponRoutes.js
+/app.js
+1. ✅ couponRoutes.js
+const express = require("express");
+const router = express.Router();
+const Coupon = require("../models/Coupon");
+
+// Create a new coupon
+router.post("/create", async (req, res) => {
+    try {
+        const { code, discount, expiry, usageLimit } = req.body;
+
+        // Basic validation
+        if (!code || !discount || !expiry || !usageLimit) {
+            return res.status(400).json({ message: "All fields are required." });
+        }
+
+        // Check if coupon code already exists
+        const existingCoupon = await Coupon.findOne({ code });
+        if (existingCoupon) {
+            return res.status(400).json({ message: "Coupon code already exists." });
+        }
+
+        // Create new coupon
+        const newCoupon = new Coupon({
+            code,
+            discount,
+            expiry,
+            usageLimit,
+            usedBy: [],
+        });
+
+        await newCoupon.save();
+        res.status(201).json({ message: "Coupon created successfully", coupon: newCoupon });
+    } catch (error) {
+        console.error("Error creating coupon:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+module.exports = router;
+2. ✅ app.js
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const couponRoutes = require("./routes/couponRoutes");
+
+const app = express();
+app.use(bodyParser.json());
+
+// Connect to MongoDB
+mongoose.connect("mongodb://localhost:27017/your-db-name", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+}).then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
+// Routes
+app.use("/api/coupons", couponRoutes);
+
+const PORT = 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+3. 🧪 Sample POST Request (via Postman or similar)
+URL:
+
+POST http://localhost:5000/api/coupons/create
+Body (JSON):
+
+{
+    "code": "NEWYEAR2025",
+    "discount": 20,
+    "expiry": "2025-12-31",
+    "usageLimit": 100
+}
+🛡️ Optional Improvements
+Add JWT-based authentication and restrict access to admins.
+
+Add middleware for validation using Joi or express-validator.
+
+Implement rate limiting or spam protection.
+
+Would you like help with API to validate a coupon (check expiry, usage, etc.) or apply a coupon to a cart?
+
+You said:
+now tell me how to apply this i am having order model like this
+const mongoose = require("mongoose");
+
+const orderSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    items: [
+        {
+            productId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Product",
+                         
+            },  
+            quantity: {       
+                type: Number,  
+            }
+        }
+    ], 
+    status: {
+        type: String,
+        enum: ["placed", "shipped", "delivered", "canceled"],
+        default: "placed",
+    }, 
+    totalAmount: {
+        type: Number,
+    },
+    paymentMode: {
+        type: String,
+    },
+
+},{timestamps: true})
+
+module.exports = mongoose.model("Order", orderSchema);
+ChatGPT said:
+Great! Now that you have both the Coupon and Order models, let’s walk through how to apply a coupon when creating an order.
+
+🎯 Goal
+When a user places an order, they can enter a coupon code. You’ll:
+
+Validate the coupon (check expiry, usage limit, and if already used by the user).
+
+Apply the discount to the total order amount.
+
+Save the order.
+
+Update the coupon’s usedBy array.
+
+✅ Sample Flow: Apply Coupon When Creating an Order
+1. 📁 orderRoutes.js (New File or Part of Existing One)
+const express = require("express");
+const router = express.Router();
+const Order = require("../models/Order");
+const Coupon = require("../models/Coupon");
+const Product = require("../models/Product"); // if you need to calculate total
+const mongoose = require("mongoose");
+
+// Create order and apply coupon
+router.post("/create", async (req, res) => {
+    try {
+        const { userId, items, paymentMode, couponCode } = req.body;
+
+        // Basic checks
+        if (!userId || !items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ message: "Invalid order data." });
+        }
+
+        // Calculate total amount from items
+        let totalAmount = 0;
+        for (const item of items) {
+            const product = await Product.findById(item.productId);
+            if (!product) {
+                return res.status(404).json({ message: `Product not found: ${item.productId}` });
+            }
+            totalAmount += product.price * item.quantity;
+        }
+
+        // Handle coupon if provided
+        let appliedCoupon = null;
+        let discountAmount = 0;
+
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ code: couponCode });
+            if (!coupon) {
+                return res.status(404).json({ message: "Invalid coupon code." });
+            }
+
+            if (new Date() > new Date(coupon.expiry)) {
+                return res.status(400).json({ message: "Coupon has expired." });
+            }
+
+            if (coupon.usageLimit <= coupon.usedBy.length) {
+                return res.status(400).json({ message: "Coupon usage limit reached." });
+            }
+
+            if (coupon.usedBy.includes(userId)) {
+                return res.status(400).json({ message: "Coupon already used by this user." });
+            }
+
+            discountAmount = (totalAmount * coupon.discount) / 100;
+            totalAmount -= discountAmount;
+            appliedCoupon = coupon;
+        }
+
+        // Create order
+        const order = new Order({
+            userId,
+            items,
+            totalAmount,
+            paymentMode,
+        });
+
+        await order.save();
+
+        // Mark coupon as used by user
+        if (appliedCoupon) {
+            appliedCoupon.usedBy.push(userId);
+            await appliedCoupon.save();
+        }
+
+        res.status(201).json({ message: "Order placed successfully", order });
+    } catch (error) {
+        console.error("Order creation error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+module.exports = router;
+2. ✅ Add Route to app.js
+const orderRoutes = require("./routes/orderRoutes");
+app.use("/api/orders", orderRoutes);
+3. 🧪 Sample Request
+URL:
+
+POST http://localhost:5000/api/orders/create
+Body (JSON):
+
+{
+    "userId": "64d1234567890abcdef12345",
+    "items": [
+        {
+            "productId": "64f1234567890abcdef12345",
+            "quantity": 2
+        }
+    ],
+    "paymentMode": "COD",
+    "couponCode": "NEWYEAR2025"
+}
+🔒 Optional Enhancements
+Check if user exists before creating the order.
+
+Validate product stock and decrease inventory.
+
+Add authentication middleware to get userId from token instead of passing it in body.
+
+Would you like to also update the Product model to handle stock decrement after order placement, or add user authentication to secure these endpoints?
+
+
+
+
+Attach
+
+Search
+
+Study
+
+Voice
+No file chosenNo file chosen
+ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+

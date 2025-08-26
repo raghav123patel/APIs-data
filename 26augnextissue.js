@@ -758,5 +758,92 @@ Study
 Voice
 No file chosenNo file chosen
 ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+//fetch vs axios doubt
+  Skip to content
+You said:
+in using fetch instead of axios how we can perform post, update and delete operations
+ChatGPT said:
+When using the native fetch API (instead of axios), you can perform POST, PUT, and DELETE operations by configuring the fetch() call with the correct HTTP method, headers, and body (if needed).
+
+Here’s how you can do each:
+
+✅ 1. POST Request (Create Data)
+fetch('https://api.example.com/data', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'John Doe',
+    age: 30
+  })
+})
+.then(response => response.json())
+.then(data => console.log('POST success:', data))
+.catch(error => console.error('POST error:', error));
+✅ 2. PUT Request (Update Entire Resource)
+fetch('https://api.example.com/data/123', {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'Jane Doe',
+    age: 32
+  })
+})
+.then(response => response.json())
+.then(data => console.log('PUT success:', data))
+.catch(error => console.error('PUT error:', error));
+Use PUT when you want to completely replace an existing resource.
+
+✅ 3. PATCH Request (Partial Update)
+fetch('https://api.example.com/data/123', {
+  method: 'PATCH',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    age: 33
+  })
+})
+.then(response => response.json())
+.then(data => console.log('PATCH success:', data))
+.catch(error => console.error('PATCH error:', error));
+Use PATCH if you're partially updating the resource.
+
+✅ 4. DELETE Request
+fetch('https://api.example.com/data/123', {
+  method: 'DELETE'
+})
+.then(response => {
+  if (response.ok) {
+    console.log('DELETE success');
+  } else {
+    console.error('DELETE failed');
+  }
+})
+.catch(error => console.error('DELETE error:', error));
+📝 Notes:
+You must set Content-Type: application/json in the headers when sending JSON data.
+
+fetch() does not reject on HTTP errors like 404 or 500. You need to check response.ok manually.
+
+Use response.json() to parse the JSON body of the response.
+
+Would you like an example using async/await syntax instead?
+
+
+
+Attach
+
+Search
+
+Study
+
+Voice
+No file chosenNo file chosen
+ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+
 
 

@@ -141,4 +141,146 @@ Study
 Voice
 No file chosenNo file chosen
 ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+Skip to content
+You said:
+server component and client component explain it with api fetching example in nextjs along with the explanation and full details in hindi
+ChatGPT said:
+Next.js में Server Components और Client Components का कॉन्सेप्ट React 18 के साथ introduce किया गया है। इससे हम बेहतर तरीके से performance optimize कर सकते हैं और user experience को smooth बना सकते हैं।
+
+🔹 Server Components और Client Components क्या होते हैं?
+✅ Server Component:
+ये components server पर render होते हैं।
+
+इन्हें ब्राउज़र पर नहीं भेजा जाता।
+
+ये directly database या backend APIs से data fetch कर सकते हैं।
+
+इनका JavaScript client तक नहीं भेजा जाता, जिससे performance बेहतर होती है।
+
+✅ Client Component:
+ये components ब्राउज़र (client-side) पर render होते हैं।
+
+Interactivity (जैसे button clicks, form input, etc.) के लिए client components की ज़रूरत होती है।
+
+इन्हें "use client" directive के साथ define किया जाता है।
+
+📦 Example: API Fetching के साथ Server और Client Component (Hindi में पूरा समझाया गया)
+🧱 Project Structure:
+app/
+ ┣ page.tsx              <-- Home Page
+ ┣ components/
+    ┣ ServerData.tsx     <-- Server Component
+    ┣ ClientData.tsx     <-- Client Component
+🟩 Step 1: एक Fake API बनाएँ या JSONPlaceholder यूज़ करें
+API: https://jsonplaceholder.typicode.com/posts/1
+
+🟦 Server Component: ServerData.tsx
+// app/components/ServerData.tsx
+import React from 'react';
+
+async function fetchPost() {
+  const res = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+  const data = await res.json();
+  return data;
+}
+
+export default async function ServerData() {
+  const post = await fetchPost();
+
+  return (
+    <div style={{ border: '1px solid green', padding: '10px' }}>
+      <h2>📡 Server Component Data</h2>
+      <p><strong>Title:</strong> {post.title}</p>
+      <p><strong>Body:</strong> {post.body}</p>
+    </div>
+  );
+}
+🔹 Explanation in Hindi:
+
+ये component server पर run होता है।
+
+fetch() server-side होता है, यानी यह client तक नहीं जाता।
+
+API call backend पर होती है, जिससे security और speed दोनों मिलती हैं।
+
+🟨 Client Component: ClientData.tsx
+// app/components/ClientData.tsx
+'use client';
+
+import React, { useEffect, useState } from 'react';
+
+export default function ClientData() {
+  const [post, setPost] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/posts/1')
+      .then(res => res.json())
+      .then(data => setPost(data));
+  }, []);
+
+  return (
+    <div style={{ border: '1px solid blue', padding: '10px' }}>
+      <h2>💻 Client Component Data</h2>
+      {post ? (
+        <>
+          <p><strong>Title:</strong> {post.title}</p>
+          <p><strong>Body:</strong> {post.body}</p>
+        </>
+      ) : (
+        <p>Loading...</p>
+      )}
+    </div>
+  );
+}
+🔹 Explanation in Hindi:
+
+ये component client/browser में run होता है।
+
+useEffect() के अंदर API call होती है यानी यह page load के बाद call होती है।
+
+Interactivity (जैसे किसी event पर fetch करना) client component से manage होता है।
+
+🔶 Main Page (app/page.tsx)
+// app/page.tsx
+import ServerData from './components/ServerData';
+import ClientData from './components/ClientData';
+
+export default function HomePage() {
+  return (
+    <div style={{ padding: '20px' }}>
+      <h1>Next.js 13 - Server vs Client Components</h1>
+      <ServerData />
+      <br />
+      <ClientData />
+    </div>
+  );
+}
+🔍 Summary (सारांश):
+Feature	Server Component	Client Component
+Render Location	Server	Browser (Client)
+Data Fetching	Server-side (directly with fetch)	useEffect के अंदर client-side
+Performance	Fast (no JS sent to client)	Slower (JS sent to client)
+Interactivity	❌ No	✅ Yes
+Use Case	Static data, SEO friendly content	User input, dynamic interactivity
+Directive Required?	❌ No	✅ "use client"
+✅ कब क्या यूज़ करें?
+जरूरत	Component
+SEO, Fast load, Static data	Server Component
+User interaction, Events	Client Component
+अगर आप चाहें तो मैं इस पूरे code का GitHub या zip structure भी बना सकता हूँ। बताएं अगर चाहिए।
+
+Also, अगर आप चाहें तो इसी example को Next.js 14 या App Router, SSR, ISR के साथ भी दिखा सकता हूँ।
+
+
+
+Attach
+
+Search
+
+Study
+
+Voice
+No file chosenNo file chosen
+ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+
 

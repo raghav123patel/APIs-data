@@ -139,3 +139,98 @@ Do you want me to also show you how parallel fetching looks in both Pages Router
 
 No file chosenNo file chosen
 ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+
+  //posts.title and return issue
+  Skip to content
+Chat history
+
+You said:
+import axios from "axios";
+const getPosts = async() => {
+    const response = await axios.get("https://dummyjson.com/posts");
+    const results = response.data;
+    console.log(results);
+}
+
+const getComments = async() => {
+    const res = await axios.get("https://dummyjson.com/comments");
+    const result = res.data;
+    console.log(result);
+}
+
+export default async function Page() {
+        const [posts, commentData] = await Promise.all([
+        getPosts(),
+        getComments(),
+      ]);
+
+      return (
+        <div>
+          <h1>Welcome, {posts.title}</h1>
+          <h2>Your Posts:</h2>
+        </div>
+      );
+} why posts.titlr not working
+ChatGPT said:
+I see the problem 👀
+
+In your code, getPosts() and getComments() don’t return anything — they just console.log the results.
+So when you do:
+
+const [posts, commentData] = await Promise.all([
+  getPosts(),
+  getComments(),
+]);
+➡️ posts and commentData are both undefined.
+That’s why posts.title doesn’t work (you’re basically doing undefined.title).
+
+Fix:
+You need to return the data from your functions:
+
+import axios from "axios";
+
+const getPosts = async () => {
+  const response = await axios.get("https://dummyjson.com/posts");
+  return response.data; // ✅ return the data instead of just console.log
+};
+
+const getComments = async () => {
+  const res = await axios.get("https://dummyjson.com/comments");
+  return res.data; // ✅ return the data
+};
+
+export default async function Page() {
+  const [posts, commentData] = await Promise.all([
+    getPosts(),
+    getComments(),
+  ]);
+
+  return (
+    <div>
+      <h1>Welcome, {posts.posts[0].title}</h1> {/* ✅ pick a post title */}
+      <h2>Your Posts:</h2>
+    </div>
+  );
+}
+Why posts.posts[0].title?
+If you check the API response from https://dummyjson.com/posts, the shape is:
+
+{
+  "posts": [
+    { "id": 1, "title": "His mother had always taught him" },
+    { "id": 2, "title": "He was an expert..." }
+  ],
+  "total": 150,
+  "skip": 0,
+  "limit": 30
+}
+So the title isn’t at posts.title, it’s inside posts.posts[0].title.
+
+👉 Do you want me to also show you how to loop through all the posts and display them in the JSX?
+
+
+
+
+No file chosenNo file chosen
+ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+
